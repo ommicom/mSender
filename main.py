@@ -1,7 +1,6 @@
 __author__ = 'Omic'
 __VERSION__ = '0.0.1'
 
-import sys
 import os
 import argparse
 
@@ -23,13 +22,14 @@ def main(argv=None):
         Mailer = mMailer.mMailer(Config.GetConfigParam('server','smtp'),Config.GetConfigParam('server','port'),Config.GetConfigParam('server','user'),Config.GetConfigParam('server','passwd'))
         if Mailer.CheckAilabilityServer()==False: raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
         Filer = mMaskFiler.mMaskFiler()
-        masksList = Config.GetConfig('masks') #get all masks
-        for mask in masksList:
-            filesList = Filer.GetFilesList(mask) #get name of files
+        lists = Config.GetConfig('lists')
+        for list in lists:
+            masks = Config.GetConfigParam(list,'mask')
+            filesList = Filer.GetFilesList(masks)
             if len(filesList)<1: continue
             else:
-                recipients = Config.GetConfigParam(mask,'recipients')
-                action = Config.GetConfigParam(mask,'action')
+                recipients = Config.GetConfigParam(list,'recipients')
+                action = Config.GetConfigParam(list,'action')
                 Mailer.PrepareMessage(filesList,recipients,act)
                 if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
 
@@ -40,4 +40,4 @@ def main(argv=None):
         print '{0}:{1}'.format(type(err),err)
 
 if __name__ =='__main__':
-    sys.exit(main())
+    main()

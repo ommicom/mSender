@@ -1,5 +1,7 @@
 __author__ = 'Omic'
 
+import json
+
 class mConfigurator():
     __conf_name = None
     __conf_dict = dict()
