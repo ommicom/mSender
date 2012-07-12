@@ -5,5 +5,5 @@ class mMaskFiler():
         pass
     def GetFilesList(self,mask='*',startPath=None,subfolders=False):
         pass
-    def MarkFiles(self):
+    def MarkFiles(self,filesList):
         pass

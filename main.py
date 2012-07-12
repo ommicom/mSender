@@ -32,6 +32,7 @@ def main(argv=None):
                 action = Config.GetConfigParam(list,'action')
                 Mailer.PrepareMessage(filesList,recipients,act)
                 if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
+                Filer.MarkFiles(filesList)
 
         print 'Done!'
     except mSenderExcept.ESenderConfigExcept as err:
