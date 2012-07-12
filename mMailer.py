@@ -12,7 +12,7 @@ class mMailer():
         self.__smtpPasswd=smtpPasswd
     def CheckAilabilityServer(self):
         pass
-    def PrepareMessage(self):
+    def PrepareMessage(self,filesList,recipients,act):
         pass
     def SendMessage(self):
         pass

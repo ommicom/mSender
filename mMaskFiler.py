@@ -7,5 +7,3 @@ class mMaskFiler():
         pass
     def MarkFiles(self):
         pass
-    def CleanFilesList(self):
-        pass

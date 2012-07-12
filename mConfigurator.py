@@ -6,14 +6,17 @@ class mConfigurator():
     def __init__(self,confName='config'):
         self.__confName = confName
     def LoadConfig(self):
-    #load and parse config file method
+    #load and parse config file
         pass
     def CreateConfig(self):
-    #prepare and save config file method
+    #prepare and save config file
         pass
-    def GetConfig(self,secConf,paramConf=None):
-    #get config variable method
+    def GetConfigParam(self,secConf,paramConf):
+    #get config variable
         pass
+    def GetConfig(self,secConf):
+        res = list()
+        return res
     def __CheckConfig(self):
     #check configuration method
         pass
