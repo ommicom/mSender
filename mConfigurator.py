@@ -3,7 +3,7 @@ __author__ = 'Omic'
 class mConfigurator():
     __conf_name = None
     __conf_dict = dict()
-    def __init__(self,conf_name='config'):
+    def __init__(self,conf_name):
         self.__conf_name = conf_name
     def LoadConfig(self):
     #load and parse config file method
