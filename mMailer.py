@@ -5,7 +5,7 @@ class mMailer():
     __smtpPort = None
     __smtpUser = None
     __smtpPasswd = None
-    def __init__(self,smtpServer,smtpPort=21,smtpUser=None,smtpPasswd=None):
+    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None):
         self.__smtpServer=smtpServer
         self.__smtpPort=smtpPort
         self.__smtpUser=smtpUser
