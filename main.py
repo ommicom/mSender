@@ -17,19 +17,21 @@ def main(argv=None):
 
     try:
         if os.path.exists(args.config)==False: raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" not exist'.format(args.config))
-        Config = mConfigurator.mConfigurator(args.config)
+        conf = open(args.config,'r').read()
+        Config = mConfigurator.mConfigurator(conf)
         if Config.LoadConfig()==False: raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" not load'.format(args.config))
-        Mailer = mMailer.mMailer(Config.GetConfigParam('server','smtp'),Config.GetConfigParam('server','port'),Config.GetConfigParam('server','user'),Config.GetConfigParam('server','passwd'))
+        serverParam = Config.GetServerParam()
+        Mailer = mMailer.mMailer(serverParam[0],serverParam[1],serverParam[2],serverParam[3])
         if Mailer.CheckAilabilityServer()==False: raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
         Filer = mMaskFiler.mMaskFiler()
-        lists = Config.GetConfig('lists')
+        lists = Config.GetLists()
         for list in lists:
-            masks = Config.GetConfigParam(list,'mask')
+            masks = Config.GetMasks(list)
             filesList = Filer.GetFilesList(masks)
             if len(filesList)<1: continue
             else:
-                recipients = Config.GetConfigParam(list,'recipients')
-                action = Config.GetConfigParam(list,'action')
+                recipients = Config.GetRecipients(list)
+                action = Config.GetAction(list)
                 Mailer.PrepareMessage(filesList,recipients,act)
                 if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
                 Filer.MarkFiles(filesList)
