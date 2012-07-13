@@ -15,9 +15,6 @@ BAK_DIRECTORY = 't:\BAK'
 
 def checkConfig(conf):
     pass
-def putToBak(filesList,bakDir):
-    for file_ in filesList:
-        shutil.move(file_,bakDir)
 
 def main(argv=None):
     listFiles = list()
@@ -41,7 +38,8 @@ def main(argv=None):
             if len(listFiles)<1: continue
             Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action'])
             if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
-            putToBak(listFiles,conf['bakdir'])
+            for file_ in listFiles:
+                shutil.move(file_,conf['bakdir'])
             listFiles = []
 
         print 'Done!'
