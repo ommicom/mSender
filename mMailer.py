@@ -1,5 +1,8 @@
 __author__ = 'Omic'
 
+import smtplib
+import email
+
 class mMailer():
     __smtpServer = None
     __smtpPort = None
