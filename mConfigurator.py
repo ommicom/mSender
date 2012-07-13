@@ -3,11 +3,10 @@ __author__ = 'Omic'
 import json
 
 class mConfigurator():
-    __conf = None
     __jconf = None
 
     def __init__(self,conf):
-        self.__conf = conf
+        self.__jconf = json.loads(conf)
 
     def LoadConfig(self):
         res = None
