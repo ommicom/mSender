@@ -11,8 +11,6 @@ import shutil
 import mMailer
 import mSenderExcept
 
-BAK_DIRECTORY = 't:\BAK'
-
 def checkConfig(conf):
     pass
 
