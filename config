@@ -1,6 +1,7 @@
 {"server":{"smtp":"192.168.0.0","port":21,"user":"","passwd":""},
+ "bakdir":"t:\\bak",
    "lists":{
-   "list1":{"mask":["*a.*","*b.*"],"recipients":["email1@mail.ru","email2@mail.ru"],"action":"NOTICE"},
-   "list2":{"mask":["*c.*","*d.*"],"recipients":["email1@mail.ru","email2@mail.ru"],"action":"ATTACH"}
+   "list1":{"mask":["*a*.txt","*.jpg"],"recipients":["email1@mail.ru","email2@mail.ru"],"action":"NOTICE"},
+   "list2":{"mask":["*c*.doc","*d*.xml"],"recipients":["email1@mail.ru","email2@mail.ru"],"action":"ATTACH"}
     }
    }
