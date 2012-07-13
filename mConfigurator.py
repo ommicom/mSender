@@ -6,7 +6,7 @@ class mConfigurator():
     __jconf = None
 
     def __init__(self,conf):
-        self.__jconf = json.loads(conf)
+        self.__conf = conf
 
     def LoadConfig(self):
         res = None
