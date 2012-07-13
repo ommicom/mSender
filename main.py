@@ -25,13 +25,13 @@ def main(argv=None):
         if Mailer.CheckAilabilityServer()==False: raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
         Filer = mMaskFiler.mMaskFiler()
         lists = Config.GetLists()
-        for list in lists:
-            masks = Config.GetMasks(list)
+        for list_ in lists:
+            masks = Config.GetMasks(list_)
             filesList = Filer.GetFilesList(masks)
             if len(filesList)<1: continue
             else:
-                recipients = Config.GetRecipients(list)
-                action = Config.GetAction(list)
+                recipients = Config.GetRecipients(list_)
+                action = Config.GetAction(list_)
                 Mailer.PrepareMessage(filesList,recipients,act)
                 if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
                 Filer.MarkFiles(filesList)
