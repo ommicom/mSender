@@ -23,11 +23,14 @@ def main(argv=None):
     args = parser.parse_args()
 
     try:
-        if os.path.exists(args.config)==False: raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" not exist'.format(args.config))
+        if os.path.exists(args.config)==False:
+            raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" not exist'.format(args.config))
         conf = json.loads(open(args.config,'r').read())
-        if(checkConfig(conf)==False): raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" have mistake(s)'.format(args.conf))
+        if(checkConfig(conf)==False):
+            raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" have mistake(s)'.format(args.conf))
         Mailer = mMailer.mMailer(conf['server']['smtp'],conf['server']['port'],conf['server']['user'],conf['server']['passwd'])
-        if Mailer.CheckAilabilityServer()==False: raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
+        if Mailer.CheckAilabilityServer()==False:
+            raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
         lists = conf['lists']
         for list_ in lists:
             masks = lists[list_]['mask']
@@ -35,7 +38,8 @@ def main(argv=None):
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1: continue
             Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action'])
-            if Mailer.SendMessage()==False: raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
+            if Mailer.SendMessage()==False:
+                raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,conf['bakdir'])
             listFiles = []
