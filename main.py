@@ -8,11 +8,12 @@ import json
 import glob
 import shutil
 
+
 import mMailer
-import mSenderExcept
+
 
 def checkConfig(conf):
-    pass
+    return True
 
 def main(argv=None):
     listFiles = list()
@@ -23,14 +24,18 @@ def main(argv=None):
     args = parser.parse_args()
 
     try:
-        if os.path.exists(args.config)==False:
-            raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" not exist'.format(args.config))
-        conf = json.loads(open(args.config,'r').read())
-        if(checkConfig(conf)==False):
-            raise mSenderExcept.ESenderConfigExcept('Configuration "{0}" have mistake(s)'.format(args.conf))
+        if not os.path.exists(args.config):
+            raise IOError('Configuration "{0}" not exist'.format(args.config))
+
+        with open(args.config,'r') as conf_file:
+            preconf = conf_file.read()
+        conf = json.loads(preconf)
+
+        if not checkConfig(conf):
+            raise BaseException('Configuration "{0}" have mistake(s)'.format(args.config))
         Mailer = mMailer.mMailer(conf['server']['smtp'],conf['server']['port'],conf['server']['user'],conf['server']['passwd'])
-        if Mailer.CheckAilabilityServer()==False:
-            raise mSenderExcept.ESenderMailerExcept('SMTP server not available')
+        if not Mailer.CheckAilabilityServer():
+            raise BaseException('SMTP server not available')
         lists = conf['lists']
         for list_ in lists:
             masks = lists[list_]['mask']
@@ -38,19 +43,18 @@ def main(argv=None):
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1: continue
             Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action'])
-            if Mailer.SendMessage()==False:
-                raise mSenderExcept.ESenderMailerExcept('Sending message not successful')
+            if not Mailer.SendMessage():
+                raise BaseException('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,conf['bakdir'])
             listFiles = []
 
         print 'Done!'
-    except mSenderExcept.ESenderConfigExcept as err:
+    except IOError as err:
         print '{0}:{1}'.format(type(err),err)
-    except mSenderExcept.ESenderMailerExcept as err:
+    except BaseException as err:
         print '{0}:{1}'.format(type(err),err)
-    #except KeyError as err:
-    #    print '{0}:{1}'.format(type(err),err)
+
 
 if __name__ =='__main__':
     sys.exit(main())

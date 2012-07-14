@@ -14,7 +14,7 @@ class mMailer():
         self.__smtpUser=smtpUser
         self.__smtpPasswd=smtpPasswd
     def CheckAilabilityServer(self):
-        pass
+        return True
     def PrepareMessage(self,filesList,recipients,act):
         pass
     def SendMessage(self):
