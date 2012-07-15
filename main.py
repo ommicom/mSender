@@ -1,5 +1,3 @@
-from cookielib import logger
-
 __author__ = 'Omic'
 __version__ = '0.0.2'
 
@@ -8,31 +6,12 @@ import argparse
 import glob
 import shutil
 import logging
-import functools
-
 
 import mMailer
 
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
-logger = logging.getLogger('mSender')
-logger.setLevel(logging.DEBUG)
-
-def putToLog(function):
-    @functools.wraps(function)
-    def wrapper(*args,**kwargs):
-        log = function.__name__
-
-        res = exception = None
-        try:
-            res = func(*args,**kwargs)
-            return res
-        except Exception as err:
-            exception = err
-        finally:
-            log +='!'
-        logger.debug(log)
-
+LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s\t')
 
 def main(argv=None):
     listFiles = list()
@@ -40,6 +19,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='mSender')
     parser.add_argument('-v','--version',action='version',help='print version mSender',version='mSender version {0}'.format(__version__))
     args = parser.parse_args()
+    logger = logging.getLogger('mSender')
+    logger.setLevel(logging.DEBUG)
 
     try:
         import configs
@@ -49,7 +30,9 @@ def main(argv=None):
         log = configs.log
 
         logger.addHandler(LOG_HANDLER.get(log['logmod'],logging.StreamHandler(sys.stdout)))
+        logger.handlers[0].setFormatter(LOG_FORMATTER)
 
+        logger.debug('SMTP server {0}:{1} user:{2}'.format(server_['smtp'],server_['port'],server_['user']))
         Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'])
         if not Mailer.CheckAilabilityServer():
             raise BaseException('SMTP server not available')
@@ -64,15 +47,16 @@ def main(argv=None):
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,configs.bakdir)
+            logger.debug('Sent file(s):{0}\tto:{1}\taction:{2}'.format(listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
+        logger.debug('Done!')
 
-        print 'Done!'
     except ImportError as err:
-        print '{0}:{1}'.format(type(err),err)
+        logger.debug('{0}:{1}'.format(type(err),err))
     except KeyError as err:
-        print '{0}:{1}'.format(type(err),'Config have errors')
+        logger.debug('{0}:{1}'.format(type(err),err))
     except BaseException as err:
-        print '{0}:{1}'.format(type(err),err)
+        logger.debug('{0}:{1}'.format(type(err),err))
 
 if __name__ =='__main__':
     sys.exit(main())

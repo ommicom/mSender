@@ -18,6 +18,6 @@ class mMailer():
     def PrepareMessage(self,filesList,recipients,act):
         pass
     def SendMessage(self):
-        pass
+        return True
     def __AttachedFileToMsg(self):
         pass
