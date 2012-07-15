@@ -1,14 +1,38 @@
+from cookielib import logger
+
 __author__ = 'Omic'
 __version__ = '0.0.2'
 
-import os
 import sys
 import argparse
 import glob
 import shutil
+import logging
+import functools
 
 
 import mMailer
+
+LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
+               'CON':logging.StreamHandler(sys.stdout)}
+logger = logging.getLogger('mSender')
+logger.setLevel(logging.DEBUG)
+
+def putToLog(function):
+    @functools.wraps(function)
+    def wrapper(*args,**kwargs):
+        log = function.__name__
+
+        res = exception = None
+        try:
+            res = func(*args,**kwargs)
+            return res
+        except Exception as err:
+            exception = err
+        finally:
+            log +='!'
+        logger.debug(log)
+
 
 def main(argv=None):
     listFiles = list()
@@ -22,6 +46,9 @@ def main(argv=None):
 
         server_ = configs.server_
         lists = configs.lists
+        log = configs.log
+
+        logger.addHandler(LOG_HANDLER.get(log['logmod'],logging.StreamHandler(sys.stdout)))
 
         Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'])
         if not Mailer.CheckAilabilityServer():
