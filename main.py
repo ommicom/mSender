@@ -13,7 +13,7 @@ LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
 LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s\t')
 
-def main(argv=None):
+def main():
     listFiles = list()
 
     parser = argparse.ArgumentParser(prog='mSender')
