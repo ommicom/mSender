@@ -11,7 +11,7 @@ import mMailer
 
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
-LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s\t')
+LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s')
 
 def main():
     listFiles = list()
@@ -27,13 +27,11 @@ def main():
 
         server_ = configs.server_
         lists = configs.lists
-        log = configs.log
 
-        logger.addHandler(LOG_HANDLER.get(log['logmod'],logging.StreamHandler(sys.stdout)))
+        logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
         logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-        logger.debug('SMTP server {0}:{1} user:{2}'.format(server_['smtp'],server_['port'],server_['user']))
-        Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'])
+        Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'])
         if not Mailer.CheckAilabilityServer():
             raise BaseException('SMTP server not available')
 
@@ -42,14 +40,15 @@ def main():
             for mask in masks:
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1:continue
-            Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action'])
+            logger.debug('SMTP server {0}:{1} user:{2}'.format(server_['smtp'],server_['port'],server_['user']))
+            if not Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action']):
+                raise BaseException('Message for sending not prepare')
             if not Mailer.SendMessage():
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,configs.bakdir)
             logger.debug('Sent file(s):{0}\tto:{1}\taction:{2}'.format(listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
-        logger.debug('Done!')
 
     except ImportError as err:
         logger.debug('{0}:{1}'.format(type(err),err))

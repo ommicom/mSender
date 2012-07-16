@@ -1,23 +1,46 @@
 __author__ = 'Omic'
 
 import smtplib
-import email
+
+from email.message import Message
+from email.mime.text import MIMEText
+from email.MIMEMultipart import MIMEMultipart
 
 class mMailer():
-    __smtpServer = None
-    __smtpPort = None
-    __smtpUser = None
-    __smtpPasswd = None
-    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None):
-        self.__smtpServer=smtpServer
-        self.__smtpPort=smtpPort
-        self.__smtpUser=smtpUser
-        self.__smtpPasswd=smtpPasswd
+    smtpServer = None
+    smtpPort = None
+    smtpUser = None
+    smtpPasswd = None
+    SMTP = None
+    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None):
+        self.smtpServer=smtpServer
+        self.smtpPort=smtpPort
+        self.smtpUser=smtpUser
+        self.smtpPasswd=smtpPasswd
     def CheckAilabilityServer(self):
-        return True
+        try:
+            self.SMTP = smtplib.SMTP(self.smtpServer,self.smtpPort)
+            #if self.smtpUser is not None:
+            #    self.SMTP.login(self.smtpUser,self.smtpPasswd)
+            return True
+        except :
+            return False
     def PrepareMessage(self,filesList,recipients,act):
-        pass
+        try:
+            action = {'ATTACH':self.__AttachedMsg,
+                      'NOTICE':self.__NoticeMsg}[act.upper()]
+            action(filesList,recipients)
+
+            return True
+        except :
+            return False
+
     def SendMessage(self):
         return True
-    def __AttachedFileToMsg(self):
-        pass
+
+    def __AttachedMsg(self,filesList,recipients):
+        print 'attach',filesList,recipients
+
+    def __NoticeMsg(self,filesList,recipients):
+        print 'notice',filesList,recipients
+

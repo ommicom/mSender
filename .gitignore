@@ -2,4 +2,8 @@
 .idea/*
 *.pyc
 *.log
+*.jpg
+*.gif
+*.txt
+*.doc
 !.gitignore
