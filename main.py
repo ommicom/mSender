@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 __author__ = 'Omic'
-__version__ = '0.0.2'
+__version__ = '0.0.1'
 
 import sys
 import argparse
@@ -46,10 +45,10 @@ def main():
             if not Mailer.SendMessage():
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
-                pass
-                #shutil.move(file_,configs.bakdir)
+                shutil.move(file_,configs.bakdir)
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
+        Mailer.ServerQuit()
 
     except ImportError as err:
         logger.debug('{0}:{1}'.format(type(err),err))
