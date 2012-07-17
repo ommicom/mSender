@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Omic'
 __version__ = '0.0.2'
 
@@ -31,7 +32,7 @@ def main():
         logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
         logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-        Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'])
+        Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
         if not Mailer.CheckAilabilityServer():
             raise BaseException('SMTP server not available')
 
@@ -45,7 +46,8 @@ def main():
             if not Mailer.SendMessage():
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
-                shutil.move(file_,configs.bakdir)
+                pass
+                #shutil.move(file_,configs.bakdir)
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
 
