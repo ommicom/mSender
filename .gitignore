@@ -6,4 +6,5 @@
 *.gif
 *.txt
 *.doc
+*.xls
 !.gitignore

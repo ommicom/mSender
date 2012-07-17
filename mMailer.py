@@ -39,8 +39,10 @@ class mMailer():
         return True
 
     def __AttachedMsg(self,filesList,recipients):
-        print 'attach',filesList,recipients
+        #print 'attach',filesList,recipients
+        pass
 
     def __NoticeMsg(self,filesList,recipients):
-        print 'notice',filesList,recipients
+        #print 'notice',filesList,recipients
+        pass
 

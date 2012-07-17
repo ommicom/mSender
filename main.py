@@ -40,14 +40,13 @@ def main():
             for mask in masks:
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1:continue
-            logger.debug('SMTP server {0}:{1} user:{2}'.format(server_['smtp'],server_['port'],server_['user']))
             if not Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action']):
                 raise BaseException('Message for sending not prepare')
             if not Mailer.SendMessage():
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,configs.bakdir)
-            logger.debug('Sent file(s):{0}\tto:{1}\taction:{2}'.format(listFiles,lists[list_]['recipients'],lists[list_]['action']))
+            logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
 
     except ImportError as err:
