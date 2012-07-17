@@ -3,12 +3,15 @@ __author__ = 'Omic'
 import smtplib
 
 from email import encoders
-from email.message import Message
 from email.mime.text import MIMEText
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 
 class mMailer():
+    """
+    class without authorization on the smtp-server
+    will be implemented in future versions
+    """
     smtpServer = None
     smtpPort = None
     smtpUser = None
