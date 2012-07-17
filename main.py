@@ -7,7 +7,7 @@ import glob
 import shutil
 import logging
 
-import mmailer
+import mMailer
 
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
@@ -31,7 +31,7 @@ def main():
         logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
         logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-        mailer = mmailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
+        mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
         if not mailer.checkAilabilityServer():
             raise BaseException('SMTP server not available')
 
