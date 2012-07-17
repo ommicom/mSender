@@ -48,11 +48,8 @@ def main():
                 shutil.move(file_,configs.bakdir)
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
-<<<<<<< HEAD
-        Mailer.MailQuit()
-=======
         Mailer.ServerQuit()
->>>>>>> 6ee1f74fd9910a3c87be3e00bd193bae489b4347
+
 
     except ImportError as err:
         logger.debug('{0}:{1}'.format(type(err),err))

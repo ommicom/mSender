@@ -74,13 +74,4 @@ class mMailer():
 
     def __NoticeMsg(self,filesList):
         self.msg = MIMEText('Incomming files: {0}'.format(', '.join(filesList)))
-<<<<<<< HEAD
-        #self.msg['Subject'] = 'mSender[NOTICE].Incomming file(s)'
-        #self.msg['Content-Type'] = 'text/html; charset=utf-8'
-        #self.msg['Content-Transfer-Encoding'] = 'quoted-printable'
-        #self.msg['From'] = self.fromAddr
-        #self.msg['To'] = ','.join(recipients)
-        pass
-=======
->>>>>>> 6ee1f74fd9910a3c87be3e00bd193bae489b4347
 
