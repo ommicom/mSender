@@ -65,7 +65,7 @@ class mMailer():
     def attachedMsg(self,filesList):
         self.msg = MIMEMultipart()
         for file_ in filesList:
-            att = MIMEBase('application','octet-stream')#open(file_,'rb')
+            att = MIMEBase('application','octet-stream')
             with open(file_,'rb') as f:
                 context_ = f.read()
             att.set_payload(context_)
