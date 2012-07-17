@@ -48,6 +48,7 @@ def main():
                 shutil.move(file_,configs.bakdir)
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
+
         mailer.serverQuit()
 
 
