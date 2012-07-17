@@ -38,8 +38,8 @@ class mMailer():
 
     def prepareMessage(self,filesList,recipients,act):
         try:
-            action = {'ATTACH':self.attachedMsg,
-                      'NOTICE':self.noticeMsg}[act.upper()]
+            action = {'ATTACH':self.__attachedMsg,
+                      'NOTICE':self.__noticeMsg}[act.upper()]
             action(filesList)
             self.msg['Subject'] = 'mSender[{0}].Incoming file(s)'.format(act)
             self.msg['Content-Type'] = 'text/plan; charset=utf-8'
@@ -62,7 +62,7 @@ class mMailer():
     def serverQuit(self):
         self.SMTP.quit()
 
-    def attachedMsg(self,filesList):
+    def __attachedMsg(self,filesList):
         self.msg = MIMEMultipart()
         for file_ in filesList:
             att = MIMEBase('application','octet-stream')
@@ -73,6 +73,6 @@ class mMailer():
             att.add_header('Content-Disposition','attachment',filename=file_)
             self.msg.attach(att)
 
-    def noticeMsg(self,filesList):
+    def __noticeMsg(self,filesList):
         self.msg = MIMEText('Incomming files: {0}'.format(', '.join(filesList)))
 
