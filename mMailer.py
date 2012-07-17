@@ -55,6 +55,8 @@ class mMailer():
         except Exception as err:
             if self.logger is not None: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
+    def MailQuit(self):
+        self.SMTP.quit()
 
 
 
@@ -69,6 +71,5 @@ class mMailer():
         #self.msg['Content-Transfer-Encoding'] = 'quoted-printable'
         #self.msg['From'] = self.fromAddr
         #self.msg['To'] = ','.join(recipients)
-
         pass
 
