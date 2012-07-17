@@ -7,7 +7,7 @@ import glob
 import shutil
 import logging
 
-import mMailer
+import mmailer
 
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
@@ -31,8 +31,8 @@ def main():
         logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
         logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-        Mailer = mMailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
-        if not Mailer.CheckAilabilityServer():
+        mailer = mmailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
+        if not mailer.checkAilabilityServer():
             raise BaseException('SMTP server not available')
 
         for list_ in lists:
@@ -40,15 +40,15 @@ def main():
             for mask in masks:
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1:continue
-            if not Mailer.PrepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action']):
+            if not mailer.prepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action']):
                 raise BaseException('Message for sending not prepare')
-            if not Mailer.SendMessage():
+            if not mailer.sendMessage():
                 raise BaseException('Sending message not successful')
             for file_ in listFiles:
                 shutil.move(file_,configs.bakdir)
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
-        Mailer.ServerQuit()
+        mailer.serverQuit()
 
 
     except ImportError as err:
