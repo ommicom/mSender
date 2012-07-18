@@ -2,6 +2,7 @@ __author__ = 'Omic'
 __version__ = '0.0.1'
 
 import sys
+import os
 import argparse
 import glob
 import shutil
@@ -31,6 +32,13 @@ def main():
         logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
         logger.handlers[0].setFormatter(LOG_FORMATTER)
 
+        if not os.path.isdir(configs.watchdir):
+            raise EnvironmentError('Watch directory "{0}" not exist'.format(configs.watchdir))
+        if not os.path.isdir(configs.bakdir):
+            raise EnvironmentError('Bak directory "{0}" not exist'.format(configs.watchdir))
+        if configs.watchdir:
+            os.chdir(configs.watchdir)
+
         mailer = mmailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
         if not mailer.checkAilabilityServer():
             raise BaseException('SMTP server not available')
@@ -51,7 +59,8 @@ def main():
 
         mailer.serverQuit()
 
-
+    except  EnvironmentError as err:
+        logger.debug('{0}:{1}'.format(type(err),err))
     except ImportError as err:
         logger.debug('{0}:{1}'.format(type(err),err))
     except KeyError as err:

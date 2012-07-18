@@ -32,8 +32,14 @@ class mMailer():
         try:
             self.SMTP = smtplib.SMTP(self.smtpServer,self.smtpPort)
             return True
+        except smtplib.SMTPConnectError as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            return False
+        except smtplib.SMTPException as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            return False
         except Exception as err:
-            if self.logger is not None: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
 
     def prepareMessage(self,filesList,recipients,act):
@@ -47,16 +53,25 @@ class mMailer():
             self.msg['From'] = self.fromAddr
             self.msg['To'] = ', '.join(recipients)
             return True
+        except smtplib.SMTPException as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            return False
         except Exception as err:
-            if self.logger is not None: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
 
     def sendMessage(self):
         try:
             self.SMTP.sendmail(self.msg['From'],self.msg['To'],self.msg.as_string())
             return True
+        except smtplib.SMTPRecipientsRefused as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            return False
+        except smtplib.SMTPException as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            return False
         except Exception as err:
-            if self.logger is not None: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
 
     def serverQuit(self):
