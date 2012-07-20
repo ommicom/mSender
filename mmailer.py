@@ -20,7 +20,7 @@ class mMailer():
     msg = None
     logger = None
 
-    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,logger=None):
+    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,auth=False,tls=False,logger=None):
         self.smtpServer=smtpServer
         self.smtpPort=smtpPort
         self.smtpUser=smtpUser
@@ -32,7 +32,8 @@ class mMailer():
         try:
             self.SMTP = smtplib.SMTP()
             self.SMTP.connect(self.smtpServer,self.smtpPort)
-            self.SMTP.helo()
+            resHelo = self.SMTP.helo()
+            print self.SMTP.ehlo()
         except smtplib.SMTPConnectError as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
         except smtplib.SMTPHeloError as err:
@@ -40,7 +41,8 @@ class mMailer():
         except IOError:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
         else:
-            return True
+            if resHelo>399: return False
+            else: return True
 
     def prepareMessage(self,filesList,recipients,act):
         try:
