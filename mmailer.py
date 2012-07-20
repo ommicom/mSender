@@ -53,9 +53,6 @@ class mMailer():
             self.msg['From'] = self.fromAddr
             self.msg['To'] = ', '.join(recipients)
             return True
-        except smtplib.SMTPException as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
         except Exception as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
@@ -68,9 +65,6 @@ class mMailer():
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
         except smtplib.SMTPException as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
-        except Exception as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
             return False
 
