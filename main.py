@@ -1,5 +1,5 @@
 __author__ = 'Omic'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 import sys
 import os
@@ -13,6 +13,7 @@ import mmailer
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
                'CON':logging.StreamHandler(sys.stdout)}
 LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s')
+LOGMODE_DEFAULT = 'CON'
 
 def main():
     listFiles = list()
@@ -24,49 +25,49 @@ def main():
     logger.setLevel(logging.DEBUG)
 
     try:
-        import configs
+        from configs import config as config
+    except ImportError as err:
+        logger.addHandler(LOG_HANDLER[LOGMODE_DEFAULT])
+        logger.debug('{0}:{1}'.format(type(err),'Can\'t load configuration'))
+        sys.exit(0)
 
-        server_ = configs.server_
-        lists = configs.lists
+    server_ = config['server']
+    lists = config['lists']
 
-        logger.addHandler(LOG_HANDLER.get(configs.logmode,logging.StreamHandler(sys.stdout)))
-        logger.handlers[0].setFormatter(LOG_FORMATTER)
+    logger.addHandler(LOG_HANDLER.get(config['logmode'],LOGMODE_DEFAULT))
+    logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-        if not os.path.isdir(configs.watchdir):
-            raise EnvironmentError('Watch directory "{0}" not exist'.format(configs.watchdir))
-        if not os.path.isdir(configs.bakdir):
-            raise EnvironmentError('Bak directory "{0}" not exist'.format(configs.watchdir))
-        if configs.watchdir:
-            os.chdir(configs.watchdir)
+    try:
+        if not os.path.isdir(config['watchdir']):
+            raise EnvironmentError('Watch directory "{0}" not exist'.format(config['watchdir']))
+        if not os.path.isdir(config['bakdir']):
+            raise EnvironmentError('Bak directory "{0}" not exist'.format(config['bakdir']))
+        os.chdir(config['watchdir'])
+    except EnvironmentError as err:
+        logger.debug('{0}:{1}'.format(type(err),err))
+        sys.exit(0)
 
-        mailer = mmailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
+    mailer = mmailer.mMailer(server_['smtp'],server_['port'],server_['user'],server_['passwd'],server_['fromaddr'],logger)
+    try:
         if not mailer.checkAilabilityServer():
-            raise BaseException('SMTP server not available')
-
+            raise Exception('SMTP server not available')
         for list_ in lists:
             masks = lists[list_]['mask']
             for mask in masks:
                 listFiles+=glob.glob(mask)
             if len(listFiles)<1:continue
             if not mailer.prepareMessage(listFiles,lists[list_]['recipients'],lists[list_]['action']):
-                raise BaseException('Message for sending not prepare')
+                raise Exception('Message for sending not prepare')
             if not mailer.sendMessage():
-                raise BaseException('Sending message not successful')
+                raise Exception('Sending message not successful')
             for file_ in listFiles:
-                shutil.move(file_,configs.bakdir)
+                shutil.move(file_,config['bakdir'])
             logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
             listFiles = []
-
         mailer.serverQuit()
-
-    except  EnvironmentError as err:
+    except Exception as err:
         logger.debug('{0}:{1}'.format(type(err),err))
-    except ImportError as err:
-        logger.debug('{0}:{1}'.format(type(err),err))
-    except KeyError as err:
-        logger.debug('{0}:{1}'.format(type(err),err))
-    except BaseException as err:
-        logger.debug('{0}:{1}'.format(type(err),err))
+        sys.exit()
 
 if __name__ =='__main__':
     sys.exit(main())
