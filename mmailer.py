@@ -28,19 +28,19 @@ class mMailer():
         self.fromAddr=fromaddr
         self.logger=logger
 
-    def checkAilabilityServer(self):
+    def checkAvailabilityServer(self):
         try:
-            self.SMTP = smtplib.SMTP(self.smtpServer,self.smtpPort)
-            return True
+            self.SMTP = smtplib.SMTP()
+            self.SMTP.connect(self.smtpServer,self.smtpPort)
+            self.SMTP.helo()
         except smtplib.SMTPConnectError as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
-        except smtplib.SMTPException as err:
+        except smtplib.SMTPHeloError as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
-        except Exception as err:
+        except IOError:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
+        else:
+            return True
 
     def prepareMessage(self,filesList,recipients,act):
         try:
@@ -52,21 +52,21 @@ class mMailer():
             self.msg['Content-Transfer-Encoding'] = 'quoted-printable'
             self.msg['From'] = self.fromAddr
             self.msg['To'] = ', '.join(recipients)
-            return True
         except Exception as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
+        else:
+            return True
 
     def sendMessage(self):
         try:
             self.SMTP.sendmail(self.msg['From'],self.msg['To'],self.msg.as_string())
-            return True
         except smtplib.SMTPRecipientsRefused as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
         except smtplib.SMTPException as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-            return False
+        else:
+            return True
+
 
     def serverQuit(self):
         self.SMTP.quit()
