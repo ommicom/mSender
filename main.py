@@ -11,7 +11,7 @@ import logging
 import mmailer
 
 LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),'CON':logging.StreamHandler(sys.stdout)}
-LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s')
+LOG_FORMATTER = logging.Formatter('%(asctime)s\t%(levelname)s\t%(lineno)d\t%(message)s')
 WATCH_DEFAULT = os.getcwd()+'\\watch'
 BAK_DEFAULT = os.getcwd()+'\\bak'
 LOGMODE_DEFAULT = 'CON'
@@ -48,6 +48,7 @@ def main():
     bakDir = config.get('bakdir',BAK_DEFAULT)
     if not os.path.isdir(watchDir): os.mkdir(watchDir)
     if not os.path.isdir(bakDir): os.mkdir(bakDir)
+    os.chdir(watchDir)
 
     smtpServer = server_.get('smtp',SMTP_SERVER_DEFAULT)
     smtpPort = server_.get('port',SMTP_PORT_DEFAULT)
@@ -60,7 +61,7 @@ def main():
     mailer = mmailer.mMailer(smtpServer,smtpPort,smtpUser,smtpPasswd,smtpAddr,smtpAuth,smtpTLS,logger)
 
     if not mailer.checkAvailabilityServer():
-        logger.error('SMTP server {0}:{1} not availability'.format(smtpServer,smtpPort))
+        logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer,smtpPort))
         sys.exit()
 
     for list_ in lists:
@@ -70,10 +71,14 @@ def main():
         for mask in masks:
             listFiles+=glob.glob(mask)
         if len(listFiles)<1:continue
-        listRecipients = lists[list_]['recipients']
-        action = litsts[list_].get('action',ACTION_DEFAULT)
+        try:
+            listRecipients = lists[list_]['recipients']
+        except KeyError:
+            logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
+            continue
+        action = lists[list_].get('action',ACTION_DEFAULT)
         if not mailer.prepareMessage(listFiles,listRecipients,action):
-            logger.error('Message to the list "{0}" was not sent'.format(list_))
+            logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
             continue
         if not mailer.sendMessage():
             logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))

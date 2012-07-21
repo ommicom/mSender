@@ -16,32 +16,44 @@ class mMailer():
     smtpPort = None
     smtpUser = None
     smtpPasswd = None
+    fromAddr = None
+    auth = False
+    tls = False
+    logger = None
     SMTP = None
     msg = None
-    logger = None
 
     def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,auth=False,tls=False,logger=None):
-        self.smtpServer=smtpServer
-        self.smtpPort=smtpPort
-        self.smtpUser=smtpUser
-        self.smtpPasswd=smtpPasswd
-        self.fromAddr=fromaddr
-        self.logger=logger
+        self.smtpServer = smtpServer
+        self.smtpPort = smtpPort
+        self.smtpUser = smtpUser
+        self.smtpPasswd = smtpPasswd
+        self.fromAddr = fromaddr
+        self.auth = auth
+        self.tls = tls
+        self.logger = logger
 
     def checkAvailabilityServer(self):
         try:
             self.SMTP = smtplib.SMTP()
             self.SMTP.connect(self.smtpServer,self.smtpPort)
-            resHelo = self.SMTP.helo()
-            print self.SMTP.ehlo()
+            resHelo=self.SMTP.ehlo()
+            if self.tls:
+                self.SMTP.starttls()
+                resHelo = self.SMTP.ehlo()
+            if self.auth:
+                self.SMTP.login(self.smtpUser,self.smtpPasswd)
         except smtplib.SMTPConnectError as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-        except smtplib.SMTPHeloError as err:
+        except smtplib.SMTPAuthenticationError as err:
+            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+        except smtplib.SMTPException as err:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
         except IOError:
             if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
         else:
-            if resHelo>399: return False
+            if resHelo[0]>399:
+                self.logger.debug('Smtp server retrun code :"{0}" message:"{1}"'.format(*resHelo))
             else: return True
 
     def prepareMessage(self,filesList,recipients,act):
