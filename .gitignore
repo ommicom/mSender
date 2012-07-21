@@ -7,4 +7,5 @@
 *.txt
 *.doc
 *.xls
+configs.py
 !.gitignore
