@@ -18,6 +18,8 @@ LOG_LEVEL = {'DEBUG':logging.DEBUG,'INFO':logging.INFO,'WARNING':logging.WARNING
 WATCH_DEFAULT = os.getcwd()+'\\watch'
 BAK_DEFAULT = os.getcwd()+'\\bak'
 
+MASK_DEFAULT = ['*.*']
+
 LOGOUTLET_DEFAULT = LOG_HANDLER['FILE']
 LOGLEVEL_DEFAULT = LOG_LEVEL['DEBUG']
 
@@ -74,7 +76,7 @@ def main():
     for list_ in lists:
         listFiles = []
         listRecipients = []
-        masks = lists[list_]['mask']
+        masks = lists[list_].get('mask',MASK_DEFAULT)
         for mask in masks:
             listFiles+=glob.glob(mask)
         if len(listFiles)<1:continue
