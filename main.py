@@ -1,5 +1,5 @@
 __author__ = 'Omic'
-__version__ = '0.0.2'
+__version__ = '0.0.4'
 
 import sys
 import os
@@ -10,16 +10,25 @@ import logging
 
 import mmailer
 
-LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),
-               'CON':logging.StreamHandler(sys.stdout)}
-LOG_FORMATTER = logging.Formatter('%(asctime)s.%(msecs)d\t%(lineno)d\t%(message)s')
+LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),'CON':logging.StreamHandler(sys.stdout)}
+LOG_FORMATTER = logging.Formatter('%(asctime)s\t%(levelname)s\t%(lineno)d\t%(message)s')
+LOG_LEVEL = {'DEBUG':logging.DEBUG,'INFO':logging.INFO,'WARNING':logging.WARNING,'ERROR':logging.ERROR,'CRITICAL':logging.CRITICAL,
+             'NOTSET':logging.NOTSET}
+
 WATCH_DEFAULT = os.getcwd()+'\\watch'
 BAK_DEFAULT = os.getcwd()+'\\bak'
-LOGMODE_DEFAULT = 'CON'
+
+MASK_DEFAULT = ['*.*']
+
+LOGOUTLET_DEFAULT = LOG_HANDLER['FILE']
+LOGLEVEL_DEFAULT = LOG_LEVEL['DEBUG']
+
 FROMADDR_DEFAULT = 'omsk@sdm.ru'
-ACTION_DEFAULT = 'NOTICE'
 SMTP_SERVER_DEFAULT = '127.0.0.1'
 SMTP_PORT_DEFAULT = 25
+SMTP_AUTH = False
+SMTP_TLS = False
+ACTION_DEFAULT = 'NOTICE'
 
 def main():
     listFiles = list()
@@ -28,55 +37,63 @@ def main():
     parser.add_argument('-v','--version',action='version',help='print version mSender',version='mSender version {0}'.format(__version__))
     args = parser.parse_args()
     logger = logging.getLogger('mSender')
-    logger.setLevel(logging.DEBUG)
 
     try:
         from configs import config as config
     except ImportError as err:
-        logger.addHandler(LOG_HANDLER[LOGMODE_DEFAULT])
-        logger.debug('{0}:{1}'.format(type(err),'Can\'t load configuration'))
+        logger.addHandler(LOGOUTLET_DEFAULT)
+        logger.error('{0}:{1}'.format(type(err),'Can\'t load configuration'))
         sys.exit(0)
 
     server_ = config['server']
     lists = config['lists']
+    log = config['log']
 
-    logger.addHandler(LOG_HANDLER.get(config['logmode'],LOGMODE_DEFAULT))
+    logger.setLevel(LOG_LEVEL.get(log['loglevel'].upper(),LOGLEVEL_DEFAULT))
+    logger.addHandler(LOG_HANDLER.get(log['logoutlet'].upper(),LOGOUTLET_DEFAULT))
     logger.handlers[0].setFormatter(LOG_FORMATTER)
 
-    watch_dir = config.get('watchdir',WATCH_DEFAULT)
-    bak_dir = config.get('bakdir',BAK_DEFAULT)
-    if not os.path.isdir(watch_dir): os.mkdir(watch_dir)
-    if not os.path.isdir(bak_dir): os.mkdir(bak_dir)
+    watchDir = config.get('watchdir',WATCH_DEFAULT)
+    bakDir = config.get('bakdir',BAK_DEFAULT)
+    if not os.path.isdir(watchDir): os.mkdir(watchDir)
+    if not os.path.isdir(bakDir): os.mkdir(bakDir)
+    os.chdir(watchDir)
 
-    smtp_server = server_.get('smtp',SMTP_SERVER_DEFAULT)
-    smtp_port = server_.get('port',SMTP_PORT_DEFAULT)
-    smtp_user = server_.get('user',None)
-    smtp_passwd = server_.get('passwd',None)
-    smtp_addr = server_.get('fromaddr',FROMADDR_DEFAULT)
+    smtpServer = server_.get('smtp',SMTP_SERVER_DEFAULT)
+    smtpPort = server_.get('port',SMTP_PORT_DEFAULT)
+    smtpUser = server_.get('user',None)
+    smtpPasswd = server_.get('passwd',None)
+    smtpAddr = server_.get('fromaddr',FROMADDR_DEFAULT)
+    smtpAuth = server_.get('auth',SMTP_AUTH)
+    smtpTLS = server_.get('tls',SMTP_TLS)
 
-    mailer = mmailer.mMailer(smtp_server,smtp_port,smtp_user,smtp_passwd,smtp_addr)
+    mailer = mmailer.mMailer(smtpServer,smtpPort,smtpUser,smtpPasswd,smtpAddr,smtpAuth,smtpTLS,logger)
 
     if not mailer.checkAvailabilityServer():
-        logger.error('SMTP server {0}:{1} not availability'.format(smtp_server,smtp_port))
+        logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer,smtpPort))
         sys.exit()
+
     for list_ in lists:
         listFiles = []
-        listRecipietns = []
-        masks = lists[list_]['mask']
+        listRecipients = []
+        masks = lists[list_].get('mask',MASK_DEFAULT)
         for mask in masks:
             listFiles+=glob.glob(mask)
         if len(listFiles)<1:continue
+        if 'recipients' not in lists[list_].keys():
+            logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
+            continue
         listRecipients = lists[list_]['recipients']
-        action = litsts[list_].get('action',ACTION_DEFAULT)
-        if not mailer.prepareMessage(listFiles,listRecipietns,action):
-            logger.error('Message for sending not prepare')
-            sys.exit()
+        action = lists[list_].get('action',ACTION_DEFAULT)
+        if not mailer.prepareMessage(listFiles,listRecipients,action):
+            logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
+            continue
         if not mailer.sendMessage():
-            logger.error('Sending message not successful')
-            sys.exit()
+            logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
+            continue
         for file_ in listFiles:
             shutil.move(file_,config['bakdir'])
-        logger.debug('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
+        logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_,listFiles,lists[list_]['recipients'],lists[list_]['action']))
     mailer.serverQuit()
 
 if __name__ =='__main__':

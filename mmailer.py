@@ -8,39 +8,48 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 
 class mMailer():
-    """
-    class without authorization on the smtp-server
-    will be implemented in future versions
-    """
     smtpServer = None
     smtpPort = None
     smtpUser = None
     smtpPasswd = None
+    fromAddr = None
+    auth = False
+    tls = False
+    logger = None
     SMTP = None
     msg = None
-    logger = None
 
-    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,logger=None):
-        self.smtpServer=smtpServer
-        self.smtpPort=smtpPort
-        self.smtpUser=smtpUser
-        self.smtpPasswd=smtpPasswd
-        self.fromAddr=fromaddr
-        self.logger=logger
+    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,auth=False,tls=False,logger=None):
+        self.smtpServer = smtpServer
+        self.smtpPort = smtpPort
+        self.smtpUser = smtpUser
+        self.smtpPasswd = smtpPasswd
+        self.fromAddr = fromaddr
+        self.auth = auth
+        self.tls = tls
+        self.logger = logger
 
     def checkAvailabilityServer(self):
         try:
             self.SMTP = smtplib.SMTP()
             self.SMTP.connect(self.smtpServer,self.smtpPort)
-            self.SMTP.helo()
+            resHelo=self.SMTP.ehlo()
+            if self.tls:
+                self.SMTP.starttls()
+            if self.auth:
+                self.SMTP.login(self.smtpUser,self.smtpPasswd)
         except smtplib.SMTPConnectError as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-        except smtplib.SMTPHeloError as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
-        except IOError:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('SMTP server connection error {0}:{1}'.format(type(err),err))
+        except smtplib.SMTPAuthenticationError as err:
+            if self.logger: self.logger.debug('Authentication error {0}:{1}'.format(type(err),err))
+        except smtplib.SMTPException as err:
+            if self.logger: self.logger.debug('Check availability with error {0}:{1}'.format(type(err),err))
+        except IOError as err:
+            if self.logger: self.logger.debug('Network connection with SMTP server has error {0}:{1}'.format(type(err),err))
         else:
-            return True
+            if resHelo[0]>399:
+                self.logger.debug('SMTP server returns code :"{0}" message:"{1}"'.format(*resHelo))
+            else: return True
 
     def prepareMessage(self,filesList,recipients,act):
         try:
@@ -53,7 +62,7 @@ class mMailer():
             self.msg['From'] = self.fromAddr
             self.msg['To'] = ', '.join(recipients)
         except Exception as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Message prepared with error {0}:{1}'.format(type(err),err))
         else:
             return True
 
@@ -61,9 +70,9 @@ class mMailer():
         try:
             self.SMTP.sendmail(self.msg['From'],self.msg['To'],self.msg.as_string())
         except smtplib.SMTPRecipientsRefused as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Recipients was refused. Check email address {0}:{1}'.format(type(err),err))
         except smtplib.SMTPException as err:
-            if self.logger: self.logger.debug('{0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Message sent with error {0}:{1}'.format(type(err),err))
         else:
             return True
 
