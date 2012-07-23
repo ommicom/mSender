@@ -3,5 +3,5 @@ config = {'server':{'smtp':'192.168.5.161','port':25,'user':'','passwd':'','from
                'ptk_update':{'mask':['ptk*.*'],'recipients':['molodtsov@sdm.ru'],'action':'attach'}},
           'bakdir':'t:\\b',
           'watchdir':'t:\\w',
-          'logmode':'FILE'}
+          'logmode':'CON'}
 
