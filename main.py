@@ -80,7 +80,7 @@ def main():
         for mask in masks:
             listFiles+=glob.glob(mask)
         if len(listFiles)<1:continue
-        if 'recipients' not in lists[list_].keys():
+        if 'recipients' not in lists[list_]:
             logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
             continue
         listRecipients = lists[list_]['recipients']
