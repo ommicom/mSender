@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Omic'
 
 import smtplib
@@ -19,7 +20,7 @@ class mMailer():
     SMTP = None
     msg = None
 
-    def __init__(self,smtpServer,smtpPort=25,smtpUser=None,smtpPasswd=None,fromaddr=None,auth=False,tls=False,logger=None):
+    def __init__(self, smtpServer, smtpPort=25, smtpUser=None, smtpPasswd=None, fromaddr=None, auth=False, tls=False, logger=None):
         self.smtpServer = smtpServer
         self.smtpPort = smtpPort
         self.smtpUser = smtpUser
@@ -32,26 +33,26 @@ class mMailer():
     def checkAvailabilityServer(self):
         try:
             self.SMTP = smtplib.SMTP()
-            self.SMTP.connect(self.smtpServer,self.smtpPort)
+            self.SMTP.connect(self.smtpServer, self.smtpPort)
             resHelo=self.SMTP.ehlo()
             if self.tls:
                 self.SMTP.starttls()
             if self.auth:
-                self.SMTP.login(self.smtpUser,self.smtpPasswd)
+                self.SMTP.login(self.smtpUser, self.smtpPasswd)
         except smtplib.SMTPConnectError as err:
-            if self.logger: self.logger.debug('SMTP server connection error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('SMTP server connection error {0}:{1}'.format(type(err), err))
         except smtplib.SMTPAuthenticationError as err:
-            if self.logger: self.logger.debug('Authentication error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Authentication error {0}:{1}'.format(type(err), err))
         except smtplib.SMTPException as err:
-            if self.logger: self.logger.debug('Check availability with error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Check availability with error {0}:{1}'.format(type(err), err))
         except IOError as err:
-            if self.logger: self.logger.debug('Network connection with SMTP server has error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Network connection with SMTP server has error {0}:{1}'.format(type(err) ,err))
         else:
             if resHelo[0]>399:
                 self.logger.debug('SMTP server returns code :"{0}" message:"{1}"'.format(*resHelo))
             else: return True
 
-    def prepareMessage(self,filesList,recipients,act):
+    def prepareMessage(self, filesList, recipients,act):
         try:
             action = {'ATTACH':self.__attachedMsg,
                       'NOTICE':self.__noticeMsg}[act.upper()]
@@ -62,17 +63,17 @@ class mMailer():
             self.msg['From'] = self.fromAddr
             self.msg['To'] = ', '.join(recipients)
         except Exception as err:
-            if self.logger: self.logger.debug('Message prepared with error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Message prepared with error {0}:{1}'.format(type(err), err))
         else:
             return True
 
     def sendMessage(self):
         try:
-            self.SMTP.sendmail(self.msg['From'],self.msg['To'],self.msg.as_string())
+            self.SMTP.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         except smtplib.SMTPRecipientsRefused as err:
-            if self.logger: self.logger.debug('Recipients was refused. Check email address {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Recipients was refused. Check email address {0}:{1}'.format(type(err), err))
         except smtplib.SMTPException as err:
-            if self.logger: self.logger.debug('Message sent with error {0}:{1}'.format(type(err),err))
+            if self.logger: self.logger.debug('Message sent with error {0}:{1}'.format(type(err), err))
         else:
             return True
 
@@ -88,7 +89,7 @@ class mMailer():
                 context_ = f.read()
             att.set_payload(context_)
             encoders.encode_base64(att)
-            att.add_header('Content-Disposition','attachment',filename=file_)
+            att.add_header('Content-Disposition','attachment', filename=file_)
             self.msg.attach(att)
 
     def __noticeMsg(self,filesList):
