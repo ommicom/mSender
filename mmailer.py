@@ -46,7 +46,7 @@ class mMailer():
         except smtplib.SMTPException as err:
             if self.logger: self.logger.debug('Check availability with error {0}:{1}'.format(type(err), err))
         except IOError as err:
-            if self.logger: self.logger.debug('Network connection with SMTP server has error {0}:{1}'.format(type(err) ,err))
+            if self.logger: self.logger.debug('Network connection with SMTP server has error {0}:{1}'.format(type(err), err))
         else:
             if resHelo[0]>399:
                 self.logger.debug('SMTP server returns code :"{0}" message:"{1}"'.format(*resHelo))
