@@ -8,4 +8,6 @@
 *.doc
 *.xls
 configs.py
+bak
+watch
 !.gitignore
