@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 __author__ = 'Omic'
 __version__ = '0.0.4'
 

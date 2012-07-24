@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 __author__ = 'Omic'
 
 import smtplib
 
 from email import encoders
 from email.mime.text import MIMEText
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 
 class mMailer():
     smtpServer = None
