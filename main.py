@@ -6,8 +6,9 @@ import sys
 import os
 import argparse
 import glob
-import shutil
+import zipfile
 import logging
+import datetime
 
 import mmailer
 
@@ -62,6 +63,13 @@ def main():
         os.mkdir(bakDir)
     os.chdir(watchDir)
 
+    dt = datetime.datetime.now()
+    dtStr = dt.strftime('%Y%m%d')
+    if sys.platform == 'win32':
+        archName = bakDir+'\\'+dtStr+'.zip'
+    else:
+        archName = bakDir+'/'+dtStr+'.zip'
+
     smtpServer = server_.get('smtp', SMTP_SERVER_DEFAULT)
     smtpPort = server_.get('port', SMTP_PORT_DEFAULT)
     smtpUser = server_.get('user', None)
@@ -96,8 +104,9 @@ def main():
             logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
             continue
         for file_ in listFiles:
-            shutil.move(file_, bakDir)
-        logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action']))
+            with zipfile.ZipFile(archName,'a') as zip_:
+                zip_.write(file_)
+        logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}\tarchive:{4}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action'],archName))
     mailer.serverQuit()
 
 if __name__ =='__main__':
