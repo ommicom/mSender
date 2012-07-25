@@ -1,5 +1,5 @@
 __author__ = 'Omic'
-__version__ = '0.0.4'
+__version__ = '0.2.0'
 __pytver__ = '3'
 
 import sys
