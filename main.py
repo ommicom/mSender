@@ -106,6 +106,7 @@ def main():
         for file_ in listFiles:
             with zipfile.ZipFile(archName,'a') as zip_:
                 zip_.write(file_)
+            os.remove(file_)
         logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}\tarchive:{4}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action'],archName))
     mailer.serverQuit()
 
