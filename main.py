@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 __author__ = 'Omic'
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 import sys
 import os
@@ -8,6 +7,7 @@ import argparse
 import glob
 import shutil
 import logging
+import time
 
 import mmailer
 
@@ -16,6 +16,7 @@ LOG_FORMATTER = logging.Formatter('%(asctime)s\t%(levelname)s\t%(lineno)d\t%(mes
 LOG_LEVEL = {'DEBUG':logging.DEBUG,'INFO':logging.INFO,'WARNING':logging.WARNING,'ERROR':logging.ERROR,'CRITICAL':logging.CRITICAL,
              'NOTSET':logging.NOTSET}
 
+CYCLE_TIME = 600
 WATCH_DEFAULT = os.getcwd()+'\\watch'
 BAK_DEFAULT = os.getcwd()+'\\bak'
 
@@ -72,33 +73,38 @@ def main():
 
     mailer = mmailer.mMailer(smtpServer, smtpPort, smtpUser, smtpPasswd, smtpAddr, smtpAuth, smtpTLS, logger)
 
-    if not mailer.checkAvailabilityServer():
-        logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer, smtpPort))
-        sys.exit()
+    while True:
+        if not glob.glob('*'):
+            time.sleep(CYCLE_TIME)
+            continue
 
-    for list_ in lists:
-        listFiles = []
-        listRecipients = []
-        masks = lists[list_].get('mask', MASK_DEFAULT)
-        for mask in masks:
-            listFiles += glob.glob(mask)
-        if not listFiles:
-            continue
-        if 'recipients' not in lists[list_]:
-            logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
-            continue
-        listRecipients = lists[list_]['recipients']
-        action = lists[list_].get('action', ACTION_DEFAULT)
-        if not mailer.prepareMessage(listFiles, listRecipients, action):
-            logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
-            continue
-        if not mailer.sendMessage():
-            logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
-            continue
-        for file_ in listFiles:
-            shutil.move(file_, bakDir)
-        logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action']))
-    mailer.serverQuit()
+        if not mailer.checkAvailabilityServer():
+            logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer, smtpPort))
+            sys.exit()
+
+        for list_ in lists:
+            listFiles = []
+            listRecipients = []
+            masks = lists[list_].get('mask', MASK_DEFAULT)
+            for mask in masks:
+                listFiles += glob.glob(mask)
+            if not listFiles:
+                continue
+            if 'recipients' not in lists[list_]:
+                logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
+                continue
+            listRecipients = lists[list_]['recipients']
+            action = lists[list_].get('action', ACTION_DEFAULT)
+            if not mailer.prepareMessage(listFiles, listRecipients, action):
+                logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
+                continue
+            if not mailer.sendMessage():
+                logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
+                continue
+            for file_ in listFiles:
+                shutil.move(file_, bakDir)
+            logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action']))
+        mailer.serverQuit()
 
 if __name__ =='__main__':
     sys.exit(main())
