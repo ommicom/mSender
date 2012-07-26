@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3.2
 __author__ = 'Omic'
 __version__ = '0.2.2'
 __pytver__ = '3'
@@ -89,7 +90,8 @@ def main():
 
         if not mailer.checkAvailabilityServer():
             logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer, smtpPort))
-            sys.exit()
+            time.sleep(CYCLE_TIME)
+            continue
 
         for list_ in lists:
             listFiles = []
