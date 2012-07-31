@@ -18,8 +18,8 @@ LOG_HANDLER = {'FILE':logging.FileHandler('msender.log'),'CON':logging.StreamHan
 LOG_FORMATTER = logging.Formatter('%(asctime)s\t%(levelname)s\t%(lineno)d\t%(message)s')
 LOG_LEVEL = {'DEBUG':logging.DEBUG,'INFO':logging.INFO,'WARNING':logging.WARNING,'ERROR':logging.ERROR,'CRITICAL':logging.CRITICAL,
              'NOTSET':logging.NOTSET}
-CYCLE_TIME = 10
 
+CYCLE_TIME = 10
 WATCH_DEFAULT = os.getcwd()+'\\watch'
 BAK_DEFAULT = os.getcwd()+'\\bak'
 
@@ -58,6 +58,7 @@ def main():
     logger.addHandler(LOG_HANDLER.get(log['logoutlet'].upper(), LOGOUTLET_DEFAULT))
     logger.handlers[0].setFormatter(LOG_FORMATTER)
 
+    logger.debug('Start mSender')
     watchDir = config.get('watchdir', WATCH_DEFAULT)
     bakDir = config.get('bakdir', BAK_DEFAULT)
     if not os.path.isdir(watchDir):
@@ -75,6 +76,8 @@ def main():
     smtpAuth = server_.get('auth', SMTP_AUTH)
     smtpTLS = server_.get('tls', SMTP_TLS)
 
+    mailer = mmailer.mMailer(smtpServer, smtpPort, smtpUser, smtpPasswd, smtpAddr, smtpAuth, smtpTLS, logger)
+
     while True:
         if not glob.glob('*'):
             time.sleep(CYCLE_TIME)
@@ -86,8 +89,6 @@ def main():
             archName = bakDir+'\\'+dtStr+'.zip'
         else:
             archName = bakDir+'/'+dtStr+'.zip'
-
-        mailer = mmailer.mMailer(smtpServer, smtpPort, smtpUser, smtpPasswd, smtpAddr, smtpAuth, smtpTLS, logger)
 
         if not mailer.checkAvailabilityServer():
             logger.error('SMTP server {0}:{1} not ready for sending message'.format(smtpServer, smtpPort))
@@ -109,9 +110,11 @@ def main():
             action = lists[list_].get('action', ACTION_DEFAULT)
             if not mailer.prepareMessage(listFiles, listRecipients, action):
                 logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
+                time.sleep(CYCLE_TIME)
                 continue
             if not mailer.sendMessage():
                 logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
+                time.sleep(CYCLE_TIME)
                 continue
             for file_ in listFiles:
                 with zipfile.ZipFile(archName,'a') as zip_:
