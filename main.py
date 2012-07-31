@@ -59,6 +59,7 @@ def main():
     logger.handlers[0].setFormatter(LOG_FORMATTER)
 
     logger.debug('Start mSender')
+
     watchDir = config.get('watchdir', WATCH_DEFAULT)
     bakDir = config.get('bakdir', BAK_DEFAULT)
     if not os.path.isdir(watchDir):
@@ -122,7 +123,6 @@ def main():
                 os.remove(file_)
             logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}\tarchive:{4}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action'],archName))
         mailer.serverQuit()
-
 
 if __name__ =='__main__':
     sys.exit(main())
