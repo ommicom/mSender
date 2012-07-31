@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3.2
 __author__ = 'Omic'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __pytver__ = '3'
 
 import sys
@@ -66,12 +66,6 @@ def main():
         os.mkdir(bakDir)
     os.chdir(watchDir)
 
-    dt = datetime.datetime.now()
-    dtStr = dt.strftime('%Y%m%d')
-    if sys.platform == 'win32':
-        archName = bakDir+'\\'+dtStr+'.zip'
-    else:
-        archName = bakDir+'/'+dtStr+'.zip'
 
     smtpServer = server_.get('smtp', SMTP_SERVER_DEFAULT)
     smtpPort = server_.get('port', SMTP_PORT_DEFAULT)
@@ -85,6 +79,13 @@ def main():
         if not glob.glob('*'):
             time.sleep(CYCLE_TIME)
             continue
+
+        dt = datetime.datetime.now()
+        dtStr = dt.strftime('%Y%m%d')
+        if sys.platform == 'win32':
+            archName = bakDir+'\\'+dtStr+'.zip'
+        else:
+            archName = bakDir+'/'+dtStr+'.zip'
 
         mailer = mmailer.mMailer(smtpServer, smtpPort, smtpUser, smtpPasswd, smtpAddr, smtpAuth, smtpTLS, logger)
 
