@@ -88,27 +88,27 @@ def main():
         listFiles = []
         listRecipients = []
         masks = lists[list_].get('mask', MASK_DEFAULT)
-        for mask in masks:
-            listFiles += glob.glob(mask)
-        if not listFiles:
-            continue
-        if 'recipients' not in lists[list_]:
-            logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
-            continue
-        listRecipients = lists[list_]['recipients']
-        action = lists[list_].get('action', ACTION_DEFAULT)
-        if not mailer.prepareMessage(listFiles, listRecipients, action):
-            logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
-            continue
-        if not mailer.sendMessage():
-            logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
-            continue
-        for file_ in listFiles:
-            with zipfile.ZipFile(archName,'a') as zip_:
-                zip_.write(file_)
-            os.remove(file_)
-        logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}\tarchive:{4}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action'],archName))
-    mailer.serverQuit()
+    for mask in masks:
+        listFiles += glob.glob(mask)
+    if not listFiles:
+        continue
+    if 'recipients' not in lists[list_]:
+        logger.error('List of recipients in list "{0}" wasn\'t defined'.format(list_))
+        continue
+    listRecipients = lists[list_]['recipients']
+    action = lists[list_].get('action', ACTION_DEFAULT)
+    if not mailer.prepareMessage(listFiles, listRecipients, action):
+        logger.error('Message to the list "{0}" wasn\'t sent'.format(list_))
+        continue
+    if not mailer.sendMessage():
+        logger.error('Sending a message to the list "{0}" of unsuccessful'.format(list_))
+        continue
+    for file_ in listFiles:
+        with zipfile.ZipFile(archName,'a') as zip_:
+            zip_.write(file_)
+        os.remove(file_)
+    logger.info('{0}: Sent file(s):{1}\tto:{2}\taction:{3}\tarchive:{4}'.format(list_, listFiles, lists[list_]['recipients'], lists[list_]['action'],archName))
+mailer.serverQuit()
 
 if __name__ =='__main__':
     sys.exit(main())
